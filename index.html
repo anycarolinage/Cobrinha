@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo Snake </title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        h1 {
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+
+        canvas {
+            background-color: #000;
+            border: 5px solid white;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Jogo Snake</h1>
+
+    <canvas id="gameCanvas" width="500" height="500"></canvas>
+    <script>
+        const tela = document.getElementById("gameCanvas");
+        const contexto = tela.getContext("2d");
+        const pontuacaoElemento = document.getElementById("pontuacao");
+
+        const tamanhoBloco = 20;
+        const tamanhoTela = 20;
+        let cobra = [{ x: 10 * tamanhoBloco, y: 10 * tamanhoBloco }];
+        let comida = { x: Math.floor(Math.random() * tamanhoTela) * tamanhoBloco, y: Math.floor(Math.random() * tamanhoTela) * tamanhoBloco };
+        let direcao = "DIREITA";
+        let jogo;
+
+        function desenhar() {
+            contexto.clearRect(0, 0, tela.width, tela.height);
+
+            // Desenha a comida
+            contexto.fillStyle = "red";
+            contexto.fillRect(comida.x, comida.y, tamanhoBloco, tamanhoBloco);
+
+            // Desenha a cobra
+            contexto.fillStyle = "green";
+            cobra.forEach((segmento, indice) => {
+                contexto.fillRect(segmento.x, segmento.y, tamanhoBloco, tamanhoBloco);
+            });
+
+        }
+
+        function atualizar() {
+            let cabeca = { ...cobra[0] };
+            if (direcao === "DIREITA") cabeca.x += tamanhoBloco;
+            if (direcao === "ESQUERDA") cabeca.x -= tamanhoBloco;
+            if (direcao === "CIMA") cabeca.y -= tamanhoBloco;
+            if (direcao === "BAIXO") cabeca.y += tamanhoBloco;
+
+            // Verifica colisões
+            if (cabeca.x < 0 || cabeca.y < 0 || cabeca.x >= tela.width || cabeca.y >= tela.height || cobra.some(segmento => segmento.x === cabeca.x && segmento.y === cabeca.y)) {
+                clearInterval(jogo);
+                alert("Fim de Jogo!");
+                return;
+            }
+
+            // Verifica se comeu a comida
+            if (cabeca.x === comida.x && cabeca.y === comida.y) {
+                comida = { x: Math.floor(Math.random() * tamanhoTela) * tamanhoBloco, y: Math.floor(Math.random() * tamanhoTela) * tamanhoBloco };
+                pontuacao += 1;
+            } else {
+                cobra.pop();
+            }
+
+            cobra.unshift(cabeca);
+            desenhar();
+        }
+
+        function mudarDirecao(evento) {
+            const tecla = evento.keyCode;
+            if (tecla === 37 && direcao !== "DIREITA") direcao = "ESQUERDA";
+            if (tecla === 38 && direcao !== "BAIXO") direcao = "CIMA";
+            if (tecla === 39 && direcao !== "ESQUERDA") direcao = "DIREITA";
+            if (tecla === 40 && direcao !== "CIMA") direcao = "BAIXO";
+        }
+
+        document.addEventListener("keydown", mudarDirecao);
+        jogo = setInterval(atualizar, 300);
+
+
+    </script>
+</body>
+
+</html>
